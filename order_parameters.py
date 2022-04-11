@@ -98,3 +98,6 @@ class Activs_prober(nn.Module):
             return input
         else:
             return self.cal_prop(input, batch)
+
+def test2():
+    print ('test')
