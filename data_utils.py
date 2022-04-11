@@ -2,7 +2,7 @@ import torch
 
 def initial_order_params(model, dataloader, loss, optimizer, device):
     model.train()
-    for data in train_loader:  # Iterate in batches over the training dataset.
+    for data in dataloader:  # Iterate in batches over the training dataset.
         x = data.x.type(torch.FloatTensor).to(device)
         edge_index = data.edge_index.to(device)
         batch = data.batch.to(device)
