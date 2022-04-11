@@ -1,7 +1,8 @@
 import torch
 
-def initial_order_params(model, dataloader, loss, optimizer, device):
-    model.train()
+def initial_order_params(model, dataloader, criterion, optimizer, device):
+    model.train() # Set model to train for proper BatchNorm behavior
+
     for data in dataloader:  # Iterate in batches over the training dataset.
         x = data.x.type(torch.FloatTensor).to(device)
         edge_index = data.edge_index.to(device)
