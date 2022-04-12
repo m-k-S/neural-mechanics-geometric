@@ -16,6 +16,7 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
         loss = criterion(out, y)  # Compute the loss.
         loss.backward()  # Derive gradients.
 
+        optimizer.step()  # Update parameters based on gradients.
         optimizer.zero_grad()  # Clear gradients.
 
     activs = {}
@@ -27,6 +28,7 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
             activs[idx] += mod.activs_norms
 
     for idx, mod in enumerate(model.conv_probes):
+        print (mod.grads_norms)
         if idx not in grads:
             grads[idx] = mod.grads_norms
         else:
