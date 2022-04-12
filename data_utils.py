@@ -20,22 +20,17 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
 
     activs = {}
     grads = {}
-    a_idx = g_idx = 1
-    for mod in model.modules():
-        alayer = 'Layer {}'.format(a_idx)
-        glayer = 'Layer {}'.format(g_idx)
-        if isinstance(mod, Activs_prober):
-            if alayer not in activs:
-                activs[alayer] = mod.activs_norms
-            else:
-                activs[alayer] += mod.activs_norms
-            a_idx += 1
-        elif isinstance(mod, Conv_prober):
-            if glayer not in grads:
-                grads[glayer] = mod.grads_norms
-            else:
-                grads[glayer] +=  mod.grads_norms
-            g_idx += 1
+    for idx, mod in enumerate(model.activ_probes):
+        if idx not in activs:
+            activs[idx] = mod.activs_norms
+        else:
+            activs[idx] += mod.activs_norms
+
+    for idx, mod in enumerate(model.conv_probes):
+        if idx not in grads:
+            grads[idx] = mod.grads_norms
+        else:
+            grads[idx] += mod.grads_norms
 
     activs = {k: torch.tensor(activs[k]).mean() for k in activs.keys()}
     grads = {k: torch.tensor(grads[k]).mean() for k in grads.keys()}
@@ -45,28 +40,23 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
 def save_order_params(model):
     activs = {}
     grads = {}
-    a_idx = g_idx = 1
-    for mod in model.modules():
-        alayer = 'Layer {}'.format(a_idx)
-        glayer = 'Layer {}'.format(g_idx)
-        if isinstance(mod, Activs_prober):
-            if alayer not in activs:
-                activs[alayer] = mod.activs_norms
-            else:
-                activs[alayer] += mod.activs_norms
-            a_idx += 1
-        elif isinstance(mod, Conv_prober):
-            if glayer not in grads:
-                grads[glayer] = mod.grads_norms
-            else:
-                grads[glayer] +=  mod.grads_norms
-            g_idx += 1
+    for idx, mod in enumerate(model.activ_probes):
+        if idx not in activs:
+            activs[idx] = mod.activs_norms
+        else:
+            activs[idx] += mod.activs_norms
+
+    for idx, mod in enumerate(model.conv_probes):
+        if idx not in grads:
+            grads[idx] = mod.grads_norms
+        else:
+            grads[idx] += mod.grads_norms
 
     return activs, grads
 
 def clear_order_params(model):
-    for mod in model.modules():
-        if isinstance(mod, Activs_prober):
-            mod.activs_norms = []
-        elif isinstance(mod, Conv_prober):
-            mod.grads_norms = []
+    for idx, mod in enumerate(model.activ_probes):
+        mod.activs_norms = []
+
+    for idx, mod in enumerate(model.conv_probes):
+        mod.grads_norms = []
