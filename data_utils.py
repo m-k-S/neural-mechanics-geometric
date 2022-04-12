@@ -28,7 +28,6 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
             activs[idx] += mod.activs_norms
 
     for idx, mod in enumerate(model.conv_probes):
-        print (mod.grads_norms)
         if idx not in grads:
             grads[idx] = mod.grads_norms
         else:
