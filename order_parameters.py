@@ -83,9 +83,8 @@ class Activs_prober(nn.Module):
                     # self.activs_corr.append(((M.sum(dim=1) - 1) / (M.shape[0]-1)).mean().item())
 
                     # Activation Ranks (calculates stable rank)
-                    tr = torch.diag(M).sum()
-                    opnom = torch.linalg.norm(M + 1e-8 * M.mean() * torch.rand(M.shape).to(self.device), ord=2) # stabilize the matrix
-                    self.activs_ranks.append((tr / opnom).item())
+                    rank = torch.matrix_rank(M)
+                    self.activs_ranks.append(M.item())
 
                     return input.clone()
 
