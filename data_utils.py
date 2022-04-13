@@ -1,6 +1,7 @@
 import torch
 from order_parameters import Activs_prober, Conv_prober
 
+
 def initial_order_params(model, dataloader, criterion, optimizer, device):
     model.train() # Set model to train for proper BatchNorm behavior
 

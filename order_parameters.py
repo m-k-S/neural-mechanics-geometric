@@ -51,9 +51,7 @@ class Activs_prober(nn.Module):
         # Activs
         self.activs_norms = []
         self.activs_corr = []
-        # self.activs_ranks = []
-        # self.activs_variance = []
-
+        self.activs_ranks = []
 
         if torch.cuda.is_available():
             self.device = 'cuda'
@@ -69,9 +67,9 @@ class Activs_prober(nn.Module):
                     M = input.clone()
 
                     # Activation Norm
-                    all_norms = torch.linalg.norm(M.type(torch.FloatTensor), dim=[1])
+                    all_norms = torch.linalg.norm(M.type(torch.FloatTensor), dim=[1]) # take the norm of each output feature vector
                     num_nodes = batch.bincount()
-                    batch_size = batch.max() # zero indexed
+                    batch_size = batch.max() # largest node number in the batch; zero indexed
                     weighted_norm_sum_per_graph = []
                     for b in range(batch_size):
                         b_norms = all_norms[batch == b].sum() / num_nodes[b]
@@ -79,17 +77,15 @@ class Activs_prober(nn.Module):
                     norm_mean = sum(weighted_norm_sum_per_graph) / (batch_size+1)
                     self.activs_norms.append(norm_mean.item())
 
-                    # These functions need fixing to process graphs properly (i.e. weight by the number of nodes in a graph, using the batch input variable)
-
                     # Activation Correlations
                     # M = (M / anorms).reshape(M.shape[0], -1)
                     # M = torch.matmul(M, M.T)
                     # self.activs_corr.append(((M.sum(dim=1) - 1) / (M.shape[0]-1)).mean().item())
 
                     # Activation Ranks (calculates stable rank)
-                    # tr = torch.diag(M).sum()
-                    # opnom = torch.linalg.norm(M + 1e-8 * M.mean() * torch.rand(M.shape).to(self.device), ord=2)
-                    # self.activs_ranks.append((tr / opnom).item())
+                    tr = torch.diag(M).sum()
+                    opnom = torch.linalg.norm(M + 1e-8 * M.mean() * torch.rand(M.shape).to(self.device), ord=2) # stabilize the matrix
+                    self.activs_ranks.append((tr / opnom).item())
 
                     return input.clone()
 
