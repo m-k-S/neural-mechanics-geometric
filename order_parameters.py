@@ -84,7 +84,7 @@ class Activs_prober(nn.Module):
 
                     # Activation Ranks (calculates stable rank)
                     rank = torch.matrix_rank(M)
-                    self.activs_ranks.append(rank.item())
+                    self.activs_ranks.append(rank.type(torch.FloatTensor).item())
 
                     return input.clone()
 
