@@ -82,9 +82,12 @@ class Activs_prober(nn.Module):
                     # M = torch.matmul(M, M.T)
                     # self.activs_corr.append(((M.sum(dim=1) - 1) / (M.shape[0]-1)).mean().item())
 
-                    # Activation Ranks (calculates stable rank)
-                    rank = torch.matrix_rank(M)
-                    self.activs_ranks.append(rank.type(torch.FloatTensor).item())
+                    # Activation Ranks
+                    # rank = torch.matrix_rank(M)
+
+                    # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
+                    rank = torch.linalg.norm(M.type(torch.FloatTensor), ord='fro') / torch.linalg.norm(M.type(torch.FloatTensor), ord=2)
+                    self.activs_ranks.append(rank.item())
 
                     return input.clone()
 
