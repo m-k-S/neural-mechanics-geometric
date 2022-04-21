@@ -159,10 +159,10 @@ class Activs_prober(nn.Module):
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     rank = full_stable_rank(M)
                     graph_mean_rank = graph_rank(M, batch)
-                    feature_rank = feature_rank(M, batch)
+                    f_rank = feature_rank(M, batch)
                     self.full_ranks.append(rank)
                     self.graph_mean_ranks.append(graph_mean_rank)
-                    self.feature_ranks.append(feature_rank)
+                    self.feature_ranks.append(f_rank)
 
                     return input.clone()
 
