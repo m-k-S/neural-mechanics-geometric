@@ -11,7 +11,7 @@ def full_stable_rank(M):
 
     D = torch.matmul(M, M.T).type(torch.FloatTensor)
     tr = torch.diag(D).sum()
-    rank = tr**2 / torch.linalg.norm(D, ord='fro') ** 2
+    rank = tr / torch.linalg.norm(D, ord=2)
     return rank.item()
 
 def graph_rank(M, batch):
@@ -30,7 +30,7 @@ def graph_rank(M, batch):
         graph_matrix = M[graph, :, :]
         D = torch.matmul(graph_matrix, graph_matrix.T).type(torch.FloatTensor)
         tr = torch.diag(D).sum()
-        rank = tr**2 / torch.linalg.norm(D, ord='fro') ** 2
+        rank = tr / torch.linalg.norm(D, ord=2)
         graph_ranks.append(rank.item())
 
     mean_graph_rank = sum(graph_ranks) / batch_size
@@ -52,7 +52,7 @@ def feature_rank(M, batch):
         feature_matrix = M[:, :, feat]
         D = torch.matmul(feature_matrix, feature_matrix.T).type(torch.FloatTensor)
         tr = torch.diag(D).sum()
-        rank = tr**2 / torch.linalg.norm(D, ord='fro') ** 2
+        rank = tr / torch.linalg.norm(D, ord=2)
         feature_ranks.append(rank.item())
 
     return feature_ranks
