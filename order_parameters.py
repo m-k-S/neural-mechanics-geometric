@@ -23,7 +23,7 @@ def graph_rank(M, batch):
     batch_size = max(batch) + 1
     dim1 = M.shape[0]
     features = M.shape[-1]
-    M = M.reshape(batch_size, dim1/batch_size, features)
+    M = M.reshape(batch_size, (dim1/batch_size).item(), features)
 
     graph_ranks = []
     for graph in range(batch_size - 1):
@@ -45,7 +45,7 @@ def feature_rank(M, batch):
     batch_size = max(batch) + 1
     dim1 = M.shape[0]
     features = M.shape[-1]
-    M = M.reshape(batch_size, dim1/batch_size, features)
+    M = M.reshape(batch_size, (dim1/batch_size).item(), features)
 
     feature_ranks = []
     for feat in range(features):
