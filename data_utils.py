@@ -45,9 +45,9 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
     # Aggregate across a full training epoch
     activs = {k: torch.tensor(activs[k]).mean() for k in activs.keys()}
     grads = {k: torch.tensor(grads[k]).mean() for k in grads.keys()}
-    full_ranks = {k: torch.tensor(full_ranks[k]).mean() for k in ranks.keys()}
-    graph_mean_ranks = {k: torch.tensor(graph_mean_ranks[k]).mean() for k in ranks.keys()}
-    feature_ranks = {k: [torch.tensor(feature_rank).mean() for feature_rank in graph_mean_ranks[k]] for k in ranks.keys()}
+    full_ranks = {k: torch.tensor(full_ranks[k]).mean() for k in full_ranks.keys()}
+    graph_mean_ranks = {k: torch.tensor(graph_mean_ranks[k]).mean() for k in graph_mean_ranks.keys()}
+    feature_ranks = {k: [torch.tensor(feature_rank).mean() for feature_rank in feature_ranks[k]] for k in feature_ranks.keys()}
 
     return activs, grads, full_ranks, graph_mean_ranks, feature_ranks
 
