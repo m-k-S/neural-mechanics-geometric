@@ -53,7 +53,7 @@ def feature_rank(M, batch):
         D = torch.matmul(feature_matrix, feature_matrix.T).type(torch.FloatTensor)
         tr = torch.diag(D).sum()
         rank = tr**2 / torch.linalg.norm(D, ord='fro') ** 2
-        graph_ranks.append(rank.item())
+        feature_ranks.append(rank.item())
 
     return feature_ranks
 
