@@ -27,7 +27,7 @@ def graph_rank(M, batch):
 
     graph_ranks = []
     for graph in range(batch_size - 1):
-        graph_matrix = D[graph, :, :]
+        graph_matrix = M[graph, :, :]
         D = torch.matmul(graph_matrix, graph_matrix.T).type(torch.FloatTensor)
         tr = torch.diag(D).sum()
         rank = tr**2 / torch.linalg.norm(D, ord='fro') ** 2
@@ -49,7 +49,7 @@ def feature_rank(M, batch):
 
     feature_ranks = []
     for feat in range(features):
-        feature_matrix = D[:, :, feat]
+        feature_matrix = M[:, :, feat]
         D = torch.matmul(feature_matrix, feature_matrix.T).type(torch.FloatTensor)
         tr = torch.diag(D).sum()
         rank = tr**2 / torch.linalg.norm(D, ord='fro') ** 2
