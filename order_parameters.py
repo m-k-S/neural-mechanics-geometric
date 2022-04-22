@@ -9,9 +9,11 @@ def full_stable_rank(M):
     # and F is the feature dimension of the convolutional layer
     # Returns a scalar
 
-    D = torch.matmul(M, M.T).type(torch.FloatTensor)
-    tr = torch.diag(D).sum()
-    rank = tr / torch.linalg.norm(D, ord=2)
+    # D = torch.matmul(M, M.T).type(torch.FloatTensor)
+    # tr = torch.diag(D).sum()
+    # rank = tr / torch.linalg.norm(D, ord=2)
+
+    rank = torch.matrix_rank(M)
     return rank.item()
 
 def graph_rank(M, batch):
