@@ -13,7 +13,7 @@ def full_stable_rank(M):
     # tr = torch.diag(D).sum()
     # rank = tr / torch.linalg.norm(D, ord=2)
 
-    rank = torch.matrix_rank(M)
+    rank = torch.matrix_rank(M).type(torch.FloatTensor)
     return rank.item()
 
 def graph_rank(M, batch):
