@@ -11,7 +11,8 @@ def full_stable_rank(M):
 
     D = torch.matmul(M, M.T).type(torch.FloatTensor)
     tr = torch.diag(D).sum()
-    rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
+    # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
+    rank = tr / torch.linalg.norm(D, ord=2)
     return rank.item()
 
 def graph_rank(M, batch):
@@ -112,7 +113,7 @@ class Conv_prober(nn.Module):
                     return input.clone()
                 else:
                     M = input.clone()
-                    
+
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     rank = full_stable_rank(M)
