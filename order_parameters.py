@@ -112,11 +112,7 @@ class Conv_prober(nn.Module):
                     return input.clone()
                 else:
                     M = input.clone()
-
-                    # Activation Norm
-                    norm_mean = activation_norm(M, batch)
-                    self.activs_norms.append(norm_mean)
-
+                    
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     rank = full_stable_rank(M)
