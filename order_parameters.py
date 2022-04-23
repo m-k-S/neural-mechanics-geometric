@@ -9,11 +9,9 @@ def full_stable_rank(M):
     # and F is the feature dimension of the convolutional layer
     # Returns a scalar
 
-    # D = torch.matmul(M, M.T).type(torch.FloatTensor)
-    # tr = torch.diag(D).sum()
-    # rank = tr / torch.linalg.norm(D, ord=2)
-
-    rank = torch.matrix_rank(M).type(torch.FloatTensor)
+    D = torch.matmul(M, M.T).type(torch.FloatTensor)
+    tr = torch.diag(D).sum()
+    rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
     return rank.item()
 
 def graph_rank(M, batch):
@@ -32,7 +30,7 @@ def graph_rank(M, batch):
         graph_matrix = M[graph, :, :]
         D = torch.matmul(graph_matrix, graph_matrix.T).type(torch.FloatTensor)
         tr = torch.diag(D).sum()
-        rank = tr / torch.linalg.norm(D, ord=2)
+        rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
         graph_ranks.append(rank.item())
 
     mean_graph_rank = sum(graph_ranks) / batch_size
@@ -54,7 +52,7 @@ def feature_rank(M, batch):
         feature_matrix = M[:, :, feat]
         D = torch.matmul(feature_matrix, feature_matrix.T).type(torch.FloatTensor)
         tr = torch.diag(D).sum()
-        rank = tr / torch.linalg.norm(D, ord=2)
+        rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
         feature_ranks.append(rank.item())
 
     return feature_ranks
@@ -96,19 +94,39 @@ class Conv_prober(nn.Module):
     def __init__(self):
         super(Conv_prober, self).__init__()
         self.batch = None
-        self.std_list = []
+
         # Grads
         self.grads_norms = []
 
         self.row_diff = []
         self.col_diff = []
 
+        self.full_ranks = []
+        self.graph_mean_ranks = []
+        self.feature_ranks = []
+
         class sim_grads(torch.autograd.Function):
             @staticmethod
             def forward(ctx, input, batch):
-                # self.std_list.append(input.std(dim=[0,2,3]).mean().item())
+                if not self.training:
+                    return input.clone()
+                else:
+                    M = input.clone()
 
-                return input.clone()
+                    # Activation Norm
+                    norm_mean = activation_norm(M, batch)
+                    self.activs_norms.append(norm_mean)
+
+                    # Activation Rank
+                    # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
+                    rank = full_stable_rank(M)
+                    graph_mean_rank = graph_rank(M, batch)
+                    f_rank = feature_rank(M, batch)
+                    self.full_ranks.append(rank)
+                    self.graph_mean_ranks.append(graph_mean_rank)
+                    self.feature_ranks.append(f_rank)
+
+                    return input.clone()
 
             @staticmethod
             def backward(ctx, grad_output):
