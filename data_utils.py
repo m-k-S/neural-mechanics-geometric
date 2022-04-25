@@ -68,29 +68,38 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
 def save_order_params(model):
     activs = {}
     grads = {}
-    full_ranks = {}
-    graph_mean_ranks = {}
-    feature_ranks = {}
+    activs_full_ranks = {}
+    activs_graph_mean_ranks = {}
+    activs_feature_ranks = {}
+    conv_full_ranks = {}
+    conv_graph_mean_ranks = {}
+    conv_feature_ranks = {}
 
     for idx, mod in enumerate(model.activ_probes):
         if idx not in activs:
             activs[idx] = mod.activs_norms
-            full_ranks[idx] = mod.full_ranks
-            graph_mean_ranks[idx] = mod.graph_mean_ranks
-            feature_ranks[idx] = mod.feature_ranks
+            activs_full_ranks[idx] = mod.full_ranks
+            activs_graph_mean_ranks[idx] = mod.graph_mean_ranks
+            activs_feature_ranks[idx] = mod.feature_ranks
         else:
             activs[idx] += mod.activs_norms
-            full_ranks[idx] += mod.full_ranks
-            graph_mean_ranks[idx] += mod.graph_mean_ranks
-            feature_ranks[idx] += mod.feature_ranks
+            activs_full_ranks[idx] += mod.full_ranks
+            activs_graph_mean_ranks[idx] += mod.graph_mean_ranks
+            activs_feature_ranks[idx] += mod.feature_ranks
 
     for idx, mod in enumerate(model.conv_probes):
         if idx not in grads:
             grads[idx] = mod.grads_norms
+            conv_full_ranks[idx] = mod.full_ranks
+            conv_graph_mean_ranks[idx] = mod.graph_mean_ranks
+            conv_feature_ranks[idx] = mod.feature_ranks
         else:
             grads[idx] += mod.grads_norms
+            conv_full_ranks[idx] += mod.full_ranks
+            conv_graph_mean_ranks[idx] += mod.graph_mean_ranks
+            conv_feature_ranks[idx] += mod.feature_ranks
 
-    return activs, grads, full_ranks, graph_mean_ranks, feature_ranks
+    return activs, grads, activs_full_ranks, activs_graph_mean_ranks, activs_feature_ranks, conv_full_ranks, conv_graph_mean_ranks, conv_feature_ranks
 
 def clear_order_params(model):
     for idx, mod in enumerate(model.activ_probes):

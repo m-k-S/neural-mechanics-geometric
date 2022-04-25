@@ -4,6 +4,8 @@ import torch
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 def train_classification(train_loader, model, criterion, optimizer):
     model.train()
 
@@ -71,4 +73,4 @@ def test_regression(loader, model, criterion):
         y = data.y[:, 0].flatten().to(device)
         out = model(x, edge_index, batch).flatten()
 
-    return criterion(out, y)  # MSE 
+    return criterion(out, y)  # MSE
