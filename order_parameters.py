@@ -36,7 +36,7 @@ def graph_rank(M, batch):
         # D = torch.matmul(graph_matrix, graph_matrix.T).type(torch.FloatTensor)
         # tr = torch.diag(D).sum()
         # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
-        rank = torch.linalg.matrix_rank(M).type(torch.FloatTensor)
+        rank = torch.linalg.matrix_rank(graph_matrix).type(torch.FloatTensor)
         graph_ranks.append(rank.item())
 
     mean_graph_rank = sum(graph_ranks) / batch_size
@@ -60,7 +60,7 @@ def feature_rank(M, batch):
         # tr = torch.diag(D).sum()
         # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
 
-        rank = torch.linalg.matrix_rank(M).type(torch.FloatTensor)
+        rank = torch.linalg.matrix_rank(feature_matrix).type(torch.FloatTensor)
         feature_ranks.append(rank.item())
 
     return feature_ranks
