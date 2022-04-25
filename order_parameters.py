@@ -12,7 +12,8 @@ def full_stable_rank(M):
     D = torch.matmul(M, M.T).type(torch.FloatTensor)
     tr = torch.diag(D).sum()
     # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
-    rank = tr / torch.linalg.norm(D, ord=2)
+    # rank = tr / torch.linalg.norm(D, ord=2)
+    rank = torch.linalg.matrix_rank(M)
     return rank.item()
 
 def graph_rank(M, batch):

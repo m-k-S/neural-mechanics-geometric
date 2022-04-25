@@ -61,7 +61,7 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
 
     conv_full_ranks = {k: torch.tensor(conv_full_ranks[k]).mean() for k in conv_full_ranks.keys()}
     conv_graph_mean_ranks = {k: torch.tensor(conv_graph_mean_ranks[k]).mean() for k in conv_graph_mean_ranks.keys()}
-    conv_feature_ranks = {k: [torch.tensor(feature_rank).mean() for feature_rank in conv_feature_ranks[k]] for k in feature_ranks.keys()}
+    conv_feature_ranks = {k: [torch.tensor(feature_rank).mean() for feature_rank in conv_feature_ranks[k]] for k in conv_feature_ranks.keys()}
 
     return activs, grads, activs_full_ranks, activs_graph_mean_ranks, activs_feature_ranks, conv_full_ranks, conv_graph_mean_ranks, conv_feature_ranks
 
