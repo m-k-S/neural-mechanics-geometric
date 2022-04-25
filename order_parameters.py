@@ -9,10 +9,12 @@ def full_stable_rank(M):
     # and F is the feature dimension of the convolutional layer
     # Returns a scalar
 
-    D = torch.matmul(M, M.T).type(torch.FloatTensor)
-    tr = torch.diag(D).sum()
+    # D = torch.matmul(M, M.T).type(torch.FloatTensor)
+    # tr = torch.diag(D).sum()
     # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
     # rank = tr / torch.linalg.norm(D, ord=2)
+
+    # Algebraic rank
     rank = torch.linalg.matrix_rank(M).type(torch.FloatTensor)
     return rank.item()
 
@@ -30,9 +32,11 @@ def graph_rank(M, batch):
     graph_ranks = []
     for graph in range(batch_size - 1):
         graph_matrix = M[graph, :, :]
-        D = torch.matmul(graph_matrix, graph_matrix.T).type(torch.FloatTensor)
-        tr = torch.diag(D).sum()
-        rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
+
+        # D = torch.matmul(graph_matrix, graph_matrix.T).type(torch.FloatTensor)
+        # tr = torch.diag(D).sum()
+        # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
+        rank = torch.linalg.matrix_rank(M).type(torch.FloatTensor)
         graph_ranks.append(rank.item())
 
     mean_graph_rank = sum(graph_ranks) / batch_size
@@ -52,9 +56,11 @@ def feature_rank(M, batch):
     feature_ranks = []
     for feat in range(features):
         feature_matrix = M[:, :, feat]
-        D = torch.matmul(feature_matrix, feature_matrix.T).type(torch.FloatTensor)
-        tr = torch.diag(D).sum()
-        rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
+        # D = torch.matmul(feature_matrix, feature_matrix.T).type(torch.FloatTensor)
+        # tr = torch.diag(D).sum()
+        # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
+
+        rank = torch.linalg.matrix_rank(M).type(torch.FloatTensor)
         feature_ranks.append(rank.item())
 
     return feature_ranks
