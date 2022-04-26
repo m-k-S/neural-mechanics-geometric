@@ -1,105 +1,103 @@
 import torch
-from order_parameters import Activs_prober, Conv_prober
+from order_parameters import ActivationProbe, ConvolutionProbe
+from data import InitializationMetric, TrainingMetric
+from train import train_regression, train_classification
 
 def initial_order_params(model, dataloader, criterion, optimizer, device):
     model.train() # Set model to train for proper BatchNorm behavior
 
-    for data in dataloader:  # Iterate in batches over the training dataset.
-        x = data.x.type(torch.FloatTensor).to(device)
-        edge_index = data.edge_index.to(device)
-        batch = data.batch.to(device)
+    if model.lin.out_features == 2:
+        train_classification(dataloader, model, criterion, optimizer, device)
+    else:
+        train_regression(dataloader, model, criterion, optimizer, device)
 
-        out = model(x, edge_index, batch).flatten()  # Perform a single forward pass.
-        y = data.y[:, 0].flatten().to(device)
+    metrics = []
+    probe_layers = model.activ_probes + model.conv_probes
 
-        loss = criterion(out, y)  # Compute the loss.
-        loss.backward()  # Derive gradients.
+    for idx, probe in enumerate(probe_layers):
+        # Set layer type name
+        layer_type="Activation" if probe.__str__() = "ActivationProbe()" else "Convolution"
 
-        optimizer.step()  # Update parameters based on gradients.
-        optimizer.zero_grad()  # Clear gradients.
+        # Get all metrics tracked by probing layer
+        for k, v in probe.__dict__:
 
-    activs = {}
-    grads = {}
-    activs_full_ranks = {}
-    activs_graph_mean_ranks = {}
-    activs_feature_ranks = {}
-    conv_full_ranks = {}
-    conv_graph_mean_ranks = {}
-    conv_feature_ranks = {}
+            # Only look for properties that are lists (these are the metrics)
+            if type(v) == list:
 
-    for idx, mod in enumerate(model.activ_probes):
-        if idx not in activs:
-            activs[idx] = mod.activs_norms
-            activs_full_ranks[idx] = mod.full_ranks
-            activs_graph_mean_ranks[idx] = mod.graph_mean_ranks
-            activs_feature_ranks[idx] = mod.feature_ranks
-        else:
-            activs[idx] += mod.activs_norms
-            activs_full_ranks[idx] += mod.full_ranks
-            activs_graph_mean_ranks[idx] += mod.graph_mean_ranks
-            activs_feature_ranks[idx] += mod.feature_ranks
+                # Feature ranks have additional subindices
+                if k == "feature_ranks":
+                    # v is a training_iter x hidden_channels size matrix
+                    v = torch.tensor(v).T
+                    for jdx, feat in enumerate(v):
+                        val = torch.tensor(feat).mean()
+                        metric = InitializationMetric(
+                            layer_type=layer_type,
+                            layer_index=idx,
+                            depth=model.num_layers,
+                            normalization=str(model.norm),
+                            name=k,
+                            value=val,
+                            feature=jdx
+                        )
+                        metrics.append(metric)
+                else:
+                    val = torch.tensor(v).mean()
+                    metric = InitializationMetric(
+                        layer_type=layer_type,
+                        layer_index=idx,
+                        depth=model.num_layers,
+                        normalization=str(model.norm),
+                        name=k,
+                        value=val
+                    )
+                    metrics.append(metric)
 
-    for idx, mod in enumerate(model.conv_probes):
-        if idx not in grads:
-            grads[idx] = mod.grads_norms
-            conv_full_ranks[idx] = mod.full_ranks
-            conv_graph_mean_ranks[idx] = mod.graph_mean_ranks
-            conv_feature_ranks[idx] = mod.feature_ranks
-        else:
-            grads[idx] += mod.grads_norms
-            conv_full_ranks[idx] += mod.full_ranks
-            conv_graph_mean_ranks[idx] += mod.graph_mean_ranks
-            conv_feature_ranks[idx] += mod.feature_ranks
+    return metrics
 
-    # Aggregate across a full training epoch
-    activs = {k: torch.tensor(activs[k]).mean() for k in activs.keys()}
-    grads = {k: torch.tensor(grads[k]).mean() for k in grads.keys()}
+def save_order_params(model, optimizer):
+    metrics = []
+    probe_layers = model.activ_probes + model.conv_probes
+    optim = "Adam" if isinstance(optimizer, torch.optim.Adam) else "None"
 
-    activs_full_ranks = {k: torch.tensor(activs_full_ranks[k]).mean() for k in activs_full_ranks.keys()}
-    activs_graph_mean_ranks = {k: torch.tensor(activs_graph_mean_ranks[k]).mean() for k in activs_graph_mean_ranks.keys()}
-    activs_feature_ranks = {k: [torch.tensor(feature_rank).mean() for feature_rank in activs_feature_ranks[k]] for k in activs_feature_ranks.keys()}
+    for idx, probe in enumerate(probe_layers):
+        # Set layer type name
+        layer_type="Activation" if probe.__str__() = "ActivationProbe()" else "Convolution"
 
-    conv_full_ranks = {k: torch.tensor(conv_full_ranks[k]).mean() for k in conv_full_ranks.keys()}
-    conv_graph_mean_ranks = {k: torch.tensor(conv_graph_mean_ranks[k]).mean() for k in conv_graph_mean_ranks.keys()}
-    conv_feature_ranks = {k: [torch.tensor(feature_rank).mean() for feature_rank in conv_feature_ranks[k]] for k in conv_feature_ranks.keys()}
+        # Get all metrics tracked by probing layer
+        for k, v in probe.__dict__:
 
-    return activs, grads, activs_full_ranks, activs_graph_mean_ranks, activs_feature_ranks, conv_full_ranks, conv_graph_mean_ranks, conv_feature_ranks
+            # Only look for properties that are lists (these are the metrics)
+            if type(v) == list:
 
-def save_order_params(model):
-    activs = {}
-    grads = {}
-    activs_full_ranks = {}
-    activs_graph_mean_ranks = {}
-    activs_feature_ranks = {}
-    conv_full_ranks = {}
-    conv_graph_mean_ranks = {}
-    conv_feature_ranks = {}
+                # Feature ranks have additional subindices
+                if k == "feature_ranks":
+                    # v is a training_iter x hidden_channels size matrix
+                    v = torch.tensor(v).T
+                    for jdx, feat in enumerate(v):
+                        metric = TrainingMetric(
+                            layer_type=layer_type,
+                            layer_index=idx,
+                            depth=model.num_layers,
+                            normalization=str(model.norm),
+                            name=k,
+                            values=feat,
+                            optimizer=optim,
+                            feature=jdx
+                        )
+                        metrics.append(metric)
+                else:
+                    metric = TrainingMetric(
+                        layer_type=layer_type,
+                        layer_index=idx,
+                        depth=model.num_layers,
+                        normalization=str(model.norm),
+                        name=k,
+                        values=v,
+                        optimizer=optim
+                    )
+                    metrics.append(metric)
 
-    for idx, mod in enumerate(model.activ_probes):
-        if idx not in activs:
-            activs[idx] = mod.activs_norms
-            activs_full_ranks[idx] = mod.full_ranks
-            activs_graph_mean_ranks[idx] = mod.graph_mean_ranks
-            activs_feature_ranks[idx] = mod.feature_ranks
-        else:
-            activs[idx] += mod.activs_norms
-            activs_full_ranks[idx] += mod.full_ranks
-            activs_graph_mean_ranks[idx] += mod.graph_mean_ranks
-            activs_feature_ranks[idx] += mod.feature_ranks
-
-    for idx, mod in enumerate(model.conv_probes):
-        if idx not in grads:
-            grads[idx] = mod.grads_norms
-            conv_full_ranks[idx] = mod.full_ranks
-            conv_graph_mean_ranks[idx] = mod.graph_mean_ranks
-            conv_feature_ranks[idx] = mod.feature_ranks
-        else:
-            grads[idx] += mod.grads_norms
-            conv_full_ranks[idx] += mod.full_ranks
-            conv_graph_mean_ranks[idx] += mod.graph_mean_ranks
-            conv_feature_ranks[idx] += mod.feature_ranks
-
-    return activs, grads, activs_full_ranks, activs_graph_mean_ranks, activs_feature_ranks, conv_full_ranks, conv_graph_mean_ranks, conv_feature_ranks
+    return metrics
 
 def clear_order_params(model):
     for idx, mod in enumerate(model.activ_probes):

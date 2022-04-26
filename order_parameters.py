@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 
-# def row_diff(H):
-
 def full_stable_rank(M):
     # Takes the stable rank of the full batch matrix, i.e. with the graph dimension and batch dimension stacked on top of each other
     # The matrix is of dimension (V_1 + ... + V_B) x F where V_i is the number of nodes in the ith graph in the batch of size B
@@ -97,20 +95,20 @@ def gradient_norm(M, batch):
     return norm_mean.item()
 
 
-class Conv_prober(nn.Module):
+class ConvolutionProbe(nn.Module):
 
     def __init__(self):
         super(Conv_prober, self).__init__()
         self.batch = None
 
         # Grads
-        self.grads_norms = []
+        self.gradient_norms = []
 
-        self.row_diff = []
-        self.col_diff = []
-
-        self.full_ranks = []
+        # Ranks
+        self.batch_ranks = []
         self.graph_mean_ranks = []
+
+        # feature_ranks will be a matrix of size num_training_steps x hidden_channels
         self.feature_ranks = []
 
         class sim_grads(torch.autograd.Function):
@@ -126,7 +124,7 @@ class Conv_prober(nn.Module):
                     rank = full_stable_rank(M)
                     graph_mean_rank = graph_rank(M, batch)
                     f_rank = feature_rank(M, batch)
-                    self.full_ranks.append(rank)
+                    self.batch_ranks.append(rank)
                     self.graph_mean_ranks.append(graph_mean_rank)
                     self.feature_ranks.append(f_rank)
 
@@ -138,7 +136,7 @@ class Conv_prober(nn.Module):
                     return grad_output.clone(), None
                 else:
                     M = grad_output.view(grad_output.shape[0], -1)
-                    self.grads_norms.append(M.norm().item())
+                    self.gradient_norms.append(M.norm().item())
 
                     return grad_output.clone(), None
 
@@ -151,21 +149,18 @@ class Conv_prober(nn.Module):
         else:
             return self.cal_prop(input, batch)
 
-class Activs_prober(nn.Module):
+class ActivationProbe(nn.Module):
     def __init__(self):
         super(Activs_prober, self).__init__()
         # Activs
-        self.activs_norms = []
-        self.activs_corr = []
+        self.activation_norm = []
+        self.activation_correlation = []
 
-        self.full_ranks = []
+        self.batch_rank = []
         self.graph_mean_ranks = []
-        self.feature_ranks = []
 
-        if torch.cuda.is_available():
-            self.device = 'cuda'
-        else:
-            self.device = 'cpu'
+        # feature_ranks will be a matrix of size num_training_steps x hidden_channels 
+        self.feature_ranks = []
 
         class sim_activs(torch.autograd.Function):
             @staticmethod
@@ -177,14 +172,14 @@ class Activs_prober(nn.Module):
 
                     # Activation Norm
                     norm_mean = activation_norm(M, batch)
-                    self.activs_norms.append(norm_mean)
+                    self.activation_norm.append(norm_mean)
 
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     rank = full_stable_rank(M)
                     graph_mean_rank = graph_rank(M, batch)
                     f_rank = feature_rank(M, batch)
-                    self.full_ranks.append(rank)
+                    self.batch_rank.append(rank)
                     self.graph_mean_ranks.append(graph_mean_rank)
                     self.feature_ranks.append(f_rank)
 
