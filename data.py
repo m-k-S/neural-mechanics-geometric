@@ -16,8 +16,6 @@ class InitializationMetric:
 
 @dataclass
 class TrainingMetric:
-    layer_type: Union[str, None] = None
-    layer_index: Union[int, None] = None
     depth: int
     normalization: str
     name: str
@@ -28,3 +26,5 @@ class TrainingMetric:
 
     # Optional fields
     feature: Union[int, None] = None
+    layer_type: Union[str, None] = None
+    layer_index: Union[int, None] = None

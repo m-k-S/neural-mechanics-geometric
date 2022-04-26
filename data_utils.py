@@ -76,25 +76,25 @@ def save_order_params(model, optimizer):
                     v = torch.tensor(v).T
                     for jdx, feat in enumerate(v):
                         metric = TrainingMetric(
-                            layer_type=layer_type,
-                            layer_index=idx,
                             depth=model.num_layers,
                             normalization=str(model.norm),
                             name=k,
                             values=feat,
                             optimizer=optim,
-                            feature=jdx
+                            feature=jdx,
+                            layer_type=layer_type,
+                            layer_index=idx
                         )
                         metrics.append(metric)
                 else:
                     metric = TrainingMetric(
-                        layer_type=layer_type,
-                        layer_index=idx,
                         depth=model.num_layers,
                         normalization=str(model.norm),
                         name=k,
                         values=v,
-                        optimizer=optim
+                        optimizer=optim,
+                        layer_type=layer_type,
+                        layer_index=idx
                     )
                     metrics.append(metric)
 
