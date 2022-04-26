@@ -12,45 +12,46 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
         train_regression(dataloader, model, criterion, optimizer, device)
 
     metrics = []
-    probe_layers = model.activ_probes + model.conv_probes
+    probe_layers = [model.activ_probes, model.conv_probes]
 
-    for idx, probe in enumerate(probe_layers):
-        # Set layer type name
-        layer_type="Activation" if isinstance(probe, ActivationProbe) else "Convolution"
+    for probe_type in probe_layers:
+        for idx, probe in enumerate(probe_type):
+            # Set layer type name
+            layer_type="Activation" if isinstance(probe, ActivationProbe) else "Convolution"
 
-        # Get all metrics tracked by probing layer
-        for k, v in probe.__dict__.items():
+            # Get all metrics tracked by probing layer
+            for k, v in probe.__dict__.items():
 
-            # Only look for properties that are lists (these are the metrics)
-            if type(v) == list:
+                # Only look for properties that are lists (these are the metrics)
+                if type(v) == list:
 
-                # Feature ranks have additional subindices
-                if k == "feature_ranks":
-                    # v is a training_iter x hidden_channels size matrix
-                    v = torch.tensor(v).T
-                    for jdx, feat in enumerate(v):
-                        val = torch.tensor(feat).mean()
+                    # Feature ranks have additional subindices
+                    if k == "feature_ranks":
+                        # v is a training_iter x hidden_channels size matrix
+                        v = torch.tensor(v).T
+                        for jdx, feat in enumerate(v):
+                            val = feat.mean()
+                            metric = InitializationMetric(
+                                layer_type=layer_type,
+                                layer_index=idx,
+                                depth=model.num_layers,
+                                normalization=str(model.norm),
+                                name=k,
+                                value=val,
+                                feature=jdx
+                            )
+                            metrics.append(metric)
+                    else:
+                        val = torch.tensor(v).mean()
                         metric = InitializationMetric(
                             layer_type=layer_type,
                             layer_index=idx,
                             depth=model.num_layers,
                             normalization=str(model.norm),
                             name=k,
-                            value=val,
-                            feature=jdx
+                            value=val
                         )
                         metrics.append(metric)
-                else:
-                    val = torch.tensor(v).mean()
-                    metric = InitializationMetric(
-                        layer_type=layer_type,
-                        layer_index=idx,
-                        depth=model.num_layers,
-                        normalization=str(model.norm),
-                        name=k,
-                        value=val
-                    )
-                    metrics.append(metric)
 
     return metrics
 
