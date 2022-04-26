@@ -19,7 +19,7 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
         layer_type="Activation" if isinstance(probe, ActivationProbe) else "Convolution"
 
         # Get all metrics tracked by probing layer
-        for k, v in probe.__dict__:
+        for k, v in probe.__dict__.items():
 
             # Only look for properties that are lists (these are the metrics)
             if type(v) == list:
@@ -64,7 +64,7 @@ def save_order_params(model, optimizer):
         layer_type="Activation" if isinstance(probe, ActivationProbe) else "Convolution"
 
         # Get all metrics tracked by probing layer
-        for k, v in probe.__dict__:
+        for k, v in probe.__dict__.items():
 
             # Only look for properties that are lists (these are the metrics)
             if type(v) == list:
