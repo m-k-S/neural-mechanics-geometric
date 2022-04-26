@@ -98,7 +98,7 @@ def gradient_norm(M, batch):
 class ConvolutionProbe(nn.Module):
 
     def __init__(self):
-        super(Conv_prober, self).__init__()
+        super(ConvolutionProbe, self).__init__()
         self.batch = None
 
         # Grads
@@ -151,7 +151,7 @@ class ConvolutionProbe(nn.Module):
 
 class ActivationProbe(nn.Module):
     def __init__(self):
-        super(Activs_prober, self).__init__()
+        super(ActivationProbe, self).__init__()
         # Activs
         self.activation_norm = []
         self.activation_correlation = []
@@ -159,7 +159,7 @@ class ActivationProbe(nn.Module):
         self.batch_rank = []
         self.graph_mean_ranks = []
 
-        # feature_ranks will be a matrix of size num_training_steps x hidden_channels 
+        # feature_ranks will be a matrix of size num_training_steps x hidden_channels
         self.feature_ranks = []
 
         class sim_activs(torch.autograd.Function):
