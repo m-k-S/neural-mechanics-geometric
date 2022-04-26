@@ -156,7 +156,7 @@ class ActivationProbe(nn.Module):
         self.activation_norm = []
         self.activation_correlation = []
 
-        self.batch_rank = []
+        self.batch_ranks = []
         self.graph_mean_ranks = []
 
         # feature_ranks will be a matrix of size num_training_steps x hidden_channels
@@ -179,7 +179,7 @@ class ActivationProbe(nn.Module):
                     rank = full_stable_rank(M)
                     graph_mean_rank = graph_rank(M, batch)
                     f_rank = feature_rank(M, batch)
-                    self.batch_rank.append(rank)
+                    self.batch_ranks.append(rank)
                     self.graph_mean_ranks.append(graph_mean_rank)
                     self.feature_ranks.append(f_rank)
 
