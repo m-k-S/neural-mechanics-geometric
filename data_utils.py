@@ -16,7 +16,7 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
 
     for idx, probe in enumerate(probe_layers):
         # Set layer type name
-        layer_type="Activation" if probe.__str__() = "ActivationProbe()" else "Convolution"
+        layer_type="Activation" if isinstance(probe, ActivationProbe) else "Convolution"
 
         # Get all metrics tracked by probing layer
         for k, v in probe.__dict__:
