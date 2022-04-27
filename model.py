@@ -26,7 +26,7 @@ class GraphNet(torch.nn.Module):
         super(GraphNet, self).__init__()
         self.num_layers = num_layers
 
-        conv_map = {'GCN': GCNConv, 'Sage': SAGEConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}
+        conv_map = {'GCN': GCNConv, 'SAGE': SAGEConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}
         self.conv_type = conv_type
 
         norm_map = {'BatchNorm': BatchNorm, 'GraphNorm': GraphNorm, 'PairNorm': PairNorm, 'DiffGroupNorm': DiffGroupNorm}
