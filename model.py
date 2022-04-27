@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torch_geometric.nn import GCNConv, GraphConv, GATv2Conv
+from torch_geometric.nn import GCNConv, GraphConv, GATv2Conv, SAGEConv
 from torch_geometric.nn import global_mean_pool
 from torch_geometric.nn.norm import GraphNorm, PairNorm, MessageNorm, DiffGroupNorm, BatchNorm
 
@@ -26,7 +26,7 @@ class GraphNet(torch.nn.Module):
         super(GCN, self).__init__()
         self.num_layers = num_layers
 
-        conv_map = {'GCN': GCNConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}
+        conv_map = {'GCN': GCNConv, 'Sage': SAGEConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}
         self.conv_type = conv_type
 
         norm_map = {'BatchNorm': BatchNorm, 'GraphNorm': GraphNorm, 'PairNorm': PairNorm, 'DiffGroupNorm': DiffGroupNorm}
