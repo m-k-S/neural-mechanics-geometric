@@ -23,7 +23,7 @@ class GraphNet(torch.nn.Module):
         # GraphNorm: in_channels (int)
         # PairNorm: scale (int)
         # DiffGroupNorm: in_channels (int), groups (int)
-        super(GCN, self).__init__()
+        super(GraphNet, self).__init__()
         self.num_layers = num_layers
 
         conv_map = {'GCN': GCNConv, 'Sage': SAGEConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}

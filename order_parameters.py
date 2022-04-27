@@ -1,18 +1,23 @@
 import torch
 import torch.nn as nn
 
-def full_stable_rank(M):
+def batch_stable_rank(M):
     # Takes the stable rank of the full batch matrix, i.e. with the graph dimension and batch dimension stacked on top of each other
     # The matrix is of dimension (V_1 + ... + V_B) x F where V_i is the number of nodes in the ith graph in the batch of size B
     # and F is the feature dimension of the convolutional layer
     # Returns a scalar
+    anorms = torch.linalg.norm(M, dim=[0, 1], keepdim=True)
+    M = (M / anorms).reshape(M.shape[0], -1)
+    M = torch.matmul(M, M.T)
+    tr = torch.diag(M).sum()
+    opnom = torch.linalg.norm(M, ord=2)
+    return (tr / opnom).item()
 
-    # D = torch.matmul(M, M.T).type(torch.FloatTensor)
-    # tr = torch.diag(D).sum()
-    # rank = tr**2 / torch.linalg.norm(D, ord='fro')**2
-    # rank = tr / torch.linalg.norm(D, ord=2)
-
-    # Algebraic rank
+def batch_algebraic_rank(M):
+    # Takes the algebraic rank of the full batch matrix, i.e. with the graph dimension and batch dimension stacked on top of each other
+    # The matrix is of dimension (V_1 + ... + V_B) x F where V_i is the number of nodes in the ith graph in the batch of size B
+    # and F is the feature dimension of the convolutional layer
+    # Returns a scalar
     rank = torch.linalg.matrix_rank(M).type(torch.FloatTensor)
     return rank.item()
 
@@ -105,7 +110,8 @@ class ConvolutionProbe(nn.Module):
         self.gradient_norms = []
 
         # Ranks
-        self.batch_ranks = []
+        self.batch_algebraic_ranks = []
+        self.batch_stable_ranks = []
         # self.graph_mean_ranks = []
 
         # feature_ranks will be a matrix of size num_training_steps x hidden_channels
@@ -121,10 +127,13 @@ class ConvolutionProbe(nn.Module):
 
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
-                    rank = full_stable_rank(M)
+                    stable_rank = batch_stable_rank(M)
+                    algebraic_rank = batch_algebraic_rank(M)
                     # graph_mean_rank = graph_rank(M, batch)
                     # f_rank = feature_rank(M, batch)
-                    self.batch_ranks.append(rank)
+                    self.batch_stable_ranks.append(stable_rank)
+                    self.batch_algebraic_ranks.append(algebraic_rank)
+
                     # self.graph_mean_ranks.append(graph_mean_rank)
                     # self.feature_ranks.append(f_rank)
 
@@ -156,7 +165,8 @@ class ActivationProbe(nn.Module):
         self.activation_norm = []
         self.activation_correlation = []
 
-        self.batch_ranks = []
+        self.batch_algebraic_ranks = []
+        self.batch_stable_ranks = []
         # self.graph_mean_ranks = []
 
         # feature_ranks will be a matrix of size num_training_steps x hidden_channels
@@ -176,10 +186,12 @@ class ActivationProbe(nn.Module):
 
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
-                    rank = full_stable_rank(M)
+                    stable_rank = batch_stable_rank(M)
+                    algebraic_rank = batch_algebraic_rank(M)
                     # graph_mean_rank = graph_rank(M, batch)
                     # f_rank = feature_rank(M, batch)
-                    self.batch_ranks.append(rank)
+                    self.batch_stable_ranks.append(stable_rank)
+                    self.batch_algebraic_ranks.append(algebraic_rank)
                     # self.graph_mean_ranks.append(graph_mean_rank)
                     # self.feature_ranks.append(f_rank)
 
