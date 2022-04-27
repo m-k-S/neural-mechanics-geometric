@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class InitializationMetric:
+    conv_type: str
     layer_type: str
     layer_index: int
     depth: int
@@ -16,6 +17,7 @@ class InitializationMetric:
 
 @dataclass
 class TrainingMetric:
+    conv_type: str
     depth: int
     normalization: str
     name: str

@@ -2,18 +2,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, GraphConv, GATv2Conv
 from torch_geometric.nn import global_mean_pool
 from torch_geometric.nn.norm import GraphNorm, PairNorm, MessageNorm, DiffGroupNorm, BatchNorm
 
 from order_parameters import ActivationProbe, ConvolutionProbe
 
-class GCN(torch.nn.Module):
+class GraphNet(torch.nn.Module):
     def __init__(
             self,
             hidden_channels,
             num_input_features,
             num_layers=3,
+            conv_type="GCN",
             task='classification',
             norm=None,
             norm_args=None):
@@ -24,6 +25,9 @@ class GCN(torch.nn.Module):
         # DiffGroupNorm: in_channels (int), groups (int)
         super(GCN, self).__init__()
         self.num_layers = num_layers
+
+        conv_map = {'GCN': GCNConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}
+        self.conv_type = conv_type
 
         norm_map = {'BatchNorm': BatchNorm, 'GraphNorm': GraphNorm, 'PairNorm': PairNorm, 'DiffGroupNorm': DiffGroupNorm}
         self.norm = norm
@@ -36,9 +40,9 @@ class GCN(torch.nn.Module):
 
         for l in range(num_layers):
             if l == 0:
-                self.conv_layers.append(GCNConv(num_input_features, hidden_channels))
+                self.conv_layers.append(conv_map[conv_type](num_input_features, hidden_channels))
             else:
-                self.conv_layers.append(GCNConv(hidden_channels, hidden_channels))
+                self.conv_layers.append(conv_map[conv_type](hidden_channels, hidden_channels))
 
             self.conv_probes.append(ConvolutionProbe())
             if norm:

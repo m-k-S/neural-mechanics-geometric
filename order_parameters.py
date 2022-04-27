@@ -106,10 +106,10 @@ class ConvolutionProbe(nn.Module):
 
         # Ranks
         self.batch_ranks = []
-        self.graph_mean_ranks = []
+        # self.graph_mean_ranks = []
 
         # feature_ranks will be a matrix of size num_training_steps x hidden_channels
-        self.feature_ranks = []
+        # self.feature_ranks = []
 
         class sim_grads(torch.autograd.Function):
             @staticmethod
@@ -122,11 +122,11 @@ class ConvolutionProbe(nn.Module):
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     rank = full_stable_rank(M)
-                    graph_mean_rank = graph_rank(M, batch)
-                    f_rank = feature_rank(M, batch)
+                    # graph_mean_rank = graph_rank(M, batch)
+                    # f_rank = feature_rank(M, batch)
                     self.batch_ranks.append(rank)
-                    self.graph_mean_ranks.append(graph_mean_rank)
-                    self.feature_ranks.append(f_rank)
+                    # self.graph_mean_ranks.append(graph_mean_rank)
+                    # self.feature_ranks.append(f_rank)
 
                     return input.clone()
 
@@ -157,10 +157,10 @@ class ActivationProbe(nn.Module):
         self.activation_correlation = []
 
         self.batch_ranks = []
-        self.graph_mean_ranks = []
+        # self.graph_mean_ranks = []
 
         # feature_ranks will be a matrix of size num_training_steps x hidden_channels
-        self.feature_ranks = []
+        # self.feature_ranks = []
 
         class sim_activs(torch.autograd.Function):
             @staticmethod
@@ -177,11 +177,11 @@ class ActivationProbe(nn.Module):
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     rank = full_stable_rank(M)
-                    graph_mean_rank = graph_rank(M, batch)
-                    f_rank = feature_rank(M, batch)
+                    # graph_mean_rank = graph_rank(M, batch)
+                    # f_rank = feature_rank(M, batch)
                     self.batch_ranks.append(rank)
-                    self.graph_mean_ranks.append(graph_mean_rank)
-                    self.feature_ranks.append(f_rank)
+                    # self.graph_mean_ranks.append(graph_mean_rank)
+                    # self.feature_ranks.append(f_rank)
 
                     return input.clone()
 

@@ -32,6 +32,7 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
                         for jdx, feat in enumerate(v):
                             val = feat.mean()
                             metric = InitializationMetric(
+                                conv_type=model.conv_type,
                                 layer_type=layer_type,
                                 layer_index=idx,
                                 depth=model.num_layers,
@@ -44,6 +45,7 @@ def initial_order_params(model, dataloader, criterion, optimizer, device):
                     else:
                         val = torch.tensor(v).mean()
                         metric = InitializationMetric(
+                            conv_type=model.conv_type,
                             layer_type=layer_type,
                             layer_index=idx,
                             depth=model.num_layers,
@@ -76,6 +78,7 @@ def save_order_params(model, optimizer):
                     v = torch.tensor(v).T
                     for jdx, feat in enumerate(v):
                         metric = TrainingMetric(
+                            conv_type=model.conv_type,
                             depth=model.num_layers,
                             normalization=str(model.norm),
                             name=k,
@@ -88,6 +91,7 @@ def save_order_params(model, optimizer):
                         metrics.append(metric)
                 else:
                     metric = TrainingMetric(
+                        conv_type=model.conv_type,
                         depth=model.num_layers,
                         normalization=str(model.norm),
                         name=k,
@@ -104,11 +108,11 @@ def clear_order_params(model):
     for idx, mod in enumerate(model.activ_probes):
         mod.activs_norms = []
         mod.full_ranks = []
-        mod.graph_mean_ranks = []
-        mod.feature_ranks = []
+        # mod.graph_mean_ranks = []
+        # mod.feature_ranks = []
 
     for idx, mod in enumerate(model.conv_probes):
         mod.grads_norms = []
         mod.full_ranks = []
-        mod.graph_mean_ranks = []
-        mod.feature_ranks = []
+        # mod.graph_mean_ranks = []
+        # mod.feature_ranks = []
