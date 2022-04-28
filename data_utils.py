@@ -6,7 +6,7 @@ from train import train_regression, train_classification
 def initial_order_params(model, dataloader, criterion, optimizer, device):
     model.train() # Set model to train for proper BatchNorm behavior
 
-    if model.lin.out_features == 2:
+    if isinstance(criterion, torch.nn.CrossEntropyLoss):
         train_classification(dataloader, model, criterion, optimizer, device)
     else:
         train_regression(dataloader, model, criterion, optimizer, device)
