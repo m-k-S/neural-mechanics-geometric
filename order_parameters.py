@@ -110,7 +110,7 @@ class ConvolutionProbe(nn.Module):
         self.gradient_norms = []
 
         # Ranks
-        self.batch_algebraic_ranks = []
+        # self.batch_algebraic_ranks = []
         self.batch_stable_ranks = []
         # self.graph_mean_ranks = []
 
@@ -132,7 +132,7 @@ class ConvolutionProbe(nn.Module):
                     # graph_mean_rank = graph_rank(M, batch)
                     # f_rank = feature_rank(M, batch)
                     self.batch_stable_ranks.append(stable_rank)
-                    self.batch_algebraic_ranks.append(algebraic_rank)
+                    # self.batch_algebraic_ranks.append(algebraic_rank)
 
                     # self.graph_mean_ranks.append(graph_mean_rank)
                     # self.feature_ranks.append(f_rank)
@@ -165,7 +165,7 @@ class ActivationProbe(nn.Module):
         self.activation_norm = []
         self.activation_correlation = []
 
-        self.batch_algebraic_ranks = []
+        # self.batch_algebraic_ranks = []
         self.batch_stable_ranks = []
         # self.graph_mean_ranks = []
 
@@ -191,7 +191,7 @@ class ActivationProbe(nn.Module):
                     # graph_mean_rank = graph_rank(M, batch)
                     # f_rank = feature_rank(M, batch)
                     self.batch_stable_ranks.append(stable_rank)
-                    self.batch_algebraic_ranks.append(algebraic_rank)
+                    # self.batch_algebraic_ranks.append(algebraic_rank)
                     # self.graph_mean_ranks.append(graph_mean_rank)
                     # self.feature_ranks.append(f_rank)
 
