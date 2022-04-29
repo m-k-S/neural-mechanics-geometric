@@ -1,6 +1,8 @@
 # Training Functions
 
 import torch
+from torch.optim.lr_scheduler import LambdaLR
+
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
