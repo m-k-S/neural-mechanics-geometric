@@ -17,7 +17,8 @@ class GraphNet(torch.nn.Module):
             conv_type="GCN",
             task='classification',
             norm=None,
-            norm_args=None):
+            norm_args=None,
+            track_metrics=False):
         # Normalization layers need specific kwargs:
         # BatchNorm: in_channels (int)
         # GraphNorm: in_channels (int)
@@ -44,7 +45,10 @@ class GraphNet(torch.nn.Module):
             else:
                 self.conv_layers.append(conv_map[conv_type](hidden_channels, hidden_channels))
 
-            self.conv_probes.append(ConvolutionProbe())
+            if track_metrics:
+                self.conv_probes.append(ConvolutionProbe())
+                self.activ_probes.append(ActivationProbe())
+
             if norm:
                 if norm_args:
                     self.norm_layers.append(norm_map[norm](**norm_args))
@@ -52,18 +56,19 @@ class GraphNet(torch.nn.Module):
                     self.norm_layers.append(norm_map[norm]())
 
             self.activations.append(nn.ReLU(inplace=True))
-            self.activ_probes.append(ActivationProbe())
 
         self.lin = torch.nn.Linear(hidden_channels, 2) if task == 'classification' else torch.nn.Linear(hidden_channels, 1)
 
     def forward(self, x, edge_index, batch):
         for l in range(self.num_layers):
             x = self.conv_layers[l](x, edge_index)
-            x = self.conv_probes[l](x, batch)
+            if track_metrics:
+                x = self.conv_probes[l](x, batch)
             if self.norm:
                 x = self.norm_layers[l](x)
             x = self.activations[l](x)
-            x = self.activ_probes[l](x, batch)
+            if track_metrics:
+                x = self.activ_probes[l](x, batch)
 
         x = global_mean_pool(x, batch)
         x = F.dropout(x, p=0.5, training=self.training)
@@ -80,7 +85,8 @@ class NodeNet(torch.nn.Module):
             num_layers=3,
             conv_type="GCN",
             norm=None,
-            norm_args=None):
+            norm_args=None,
+            track_metrics=False):
         # Normalization layers need specific kwargs:
         # BatchNorm: in_channels (int)
         # GraphNorm: in_channels (int)
@@ -111,7 +117,10 @@ class NodeNet(torch.nn.Module):
             else:
                 self.conv_layers.append(conv_map[conv_type](hidden_channels, hidden_channels))
 
-            self.conv_probes.append(ConvolutionProbe())
+            if track_metrics:
+                self.conv_probes.append(ConvolutionProbe())
+                self.activ_probes.append(ActivationProbe())
+
             if norm:
                 if norm_args:
                     self.norm_layers.append(norm_map[norm](**norm_args))
@@ -119,16 +128,17 @@ class NodeNet(torch.nn.Module):
                     self.norm_layers.append(norm_map[norm]())
 
             self.activations.append(nn.ReLU(inplace=True))
-            self.activ_probes.append(ActivationProbe())
 
     def forward(self, x, edge_index, batch):
         for l in range(self.num_layers - 1):
             x = self.conv_layers[l](x, edge_index)
-            x = self.conv_probes[l](x, batch)
+            if track_metrics:
+                x = self.conv_probes[l](x, batch)
             if self.norm:
                 x = self.norm_layers[l](x)
             x = self.activations[l](x)
-            x = self.activ_probes[l](x, batch)
+            if track_metrics:
+                x = self.activ_probes[l](x, batch)
 
         x = self.conv_layers[-1](x, edge_index)
         x = self.conv_probes[-1](x, batch)
