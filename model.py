@@ -26,6 +26,7 @@ class GraphNet(torch.nn.Module):
         # DiffGroupNorm: in_channels (int), groups (int)
         super(GraphNet, self).__init__()
         self.num_layers = num_layers
+        self.track_metrics = track_metrics
 
         conv_map = {'GCN': GCNConv, 'SAGE': SAGEConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}
         self.conv_type = conv_type
@@ -62,12 +63,12 @@ class GraphNet(torch.nn.Module):
     def forward(self, x, edge_index, batch):
         for l in range(self.num_layers):
             x = self.conv_layers[l](x, edge_index)
-            if track_metrics:
+            if self.track_metrics:
                 x = self.conv_probes[l](x, batch)
             if self.norm:
                 x = self.norm_layers[l](x)
             x = self.activations[l](x)
-            if track_metrics:
+            if self.track_metrics:
                 x = self.activ_probes[l](x, batch)
 
         x = global_mean_pool(x, batch)
@@ -94,6 +95,7 @@ class NodeNet(torch.nn.Module):
         # DiffGroupNorm: in_channels (int), groups (int)
         super(NodeNet, self).__init__()
         self.num_layers = num_layers
+        self.track_metrics = track_metrics
 
         conv_map = {'GCN': GCNConv, 'SAGE': SAGEConv, 'GraphConv': GraphConv, 'GAT': GATv2Conv}
         self.conv_type = conv_type
@@ -132,12 +134,12 @@ class NodeNet(torch.nn.Module):
     def forward(self, x, edge_index, batch):
         for l in range(self.num_layers - 1):
             x = self.conv_layers[l](x, edge_index)
-            if track_metrics:
+            if self.track_metrics:
                 x = self.conv_probes[l](x, batch)
             if self.norm:
                 x = self.norm_layers[l](x)
             x = self.activations[l](x)
-            if track_metrics:
+            if self.track_metrics:
                 x = self.activ_probes[l](x, batch)
 
         x = self.conv_layers[-1](x, edge_index)
