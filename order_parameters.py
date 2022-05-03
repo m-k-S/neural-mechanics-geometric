@@ -1,17 +1,15 @@
 import torch
 import torch.nn as nn
 
+# def dirichlet_energy(M):
+
 def batch_stable_rank(M):
     # Takes the stable rank of the full batch matrix, i.e. with the graph dimension and batch dimension stacked on top of each other
     # The matrix is of dimension (V_1 + ... + V_B) x F where V_i is the number of nodes in the ith graph in the batch of size B
     # and F is the feature dimension of the convolutional layer
     # Returns a scalar
-    anorms = torch.linalg.norm(M, dim=[0, 1], keepdim=True)
-    M = (M / anorms).reshape(M.shape[0], -1)
-    M = torch.matmul(M, M.T)
-    tr = torch.diag(M).sum()
-    opnom = torch.linalg.norm(M, ord=2)
-    return (tr / opnom).item()
+
+    return (torch.linalg.norm(M, ord='fro')**2) / (torch.linalg.norm(M, ord=2)**2).item()
 
 def batch_algebraic_rank(M):
     # Takes the algebraic rank of the full batch matrix, i.e. with the graph dimension and batch dimension stacked on top of each other
@@ -128,7 +126,7 @@ class ConvolutionProbe(nn.Module):
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     stable_rank = batch_stable_rank(M)
-                    algebraic_rank = batch_algebraic_rank(M)
+                    # algebraic_rank = batch_algebraic_rank(M)
                     # graph_mean_rank = graph_rank(M, batch)
                     # f_rank = feature_rank(M, batch)
                     self.batch_stable_ranks.append(stable_rank)
@@ -187,7 +185,7 @@ class ActivationProbe(nn.Module):
                     # Activation Rank
                     # Stable rank is more suitable for numerics: https://arxiv.org/pdf/1501.01571.pdf
                     stable_rank = batch_stable_rank(M)
-                    algebraic_rank = batch_algebraic_rank(M)
+                    # algebraic_rank = batch_algebraic_rank(M)
                     # graph_mean_rank = graph_rank(M, batch)
                     # f_rank = feature_rank(M, batch)
                     self.batch_stable_ranks.append(stable_rank)
