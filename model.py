@@ -13,9 +13,9 @@ class GraphNet(torch.nn.Module):
             self,
             hidden_channels,
             num_input_features,
+            num_classes,
             num_layers=3,
             conv_type="GCN",
-            task='classification',
             norm=None,
             norm_args=None,
             track_metrics=False):
@@ -58,7 +58,7 @@ class GraphNet(torch.nn.Module):
 
             self.activations.append(nn.ReLU(inplace=True))
 
-        self.lin = torch.nn.Linear(hidden_channels, 2) if task == 'classification' else torch.nn.Linear(hidden_channels, 1)
+        self.lin = torch.nn.Linear(hidden_channels, num_classes)
 
     def forward(self, x, edge_index, batch):
         for l in range(self.num_layers):
